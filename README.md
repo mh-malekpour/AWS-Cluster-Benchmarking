@@ -1,11 +1,9 @@
 # AWS-Cluster-Benchmarking
 Cluster Benchmarking using EC2 Virtual Machines and Elastic Load Balancer (ELB)
 
-If you want users to use the exact version of the `Pipfile` and its dependencies as provided in the repository, you can include instructions in your README to guide users through the process. Here's how you can do that:
+## Project Environment Setup
 
-## Setting Up the Project Environment
-
-1. **Clone the Repository:**
+1. **Clone Repository:**
 
    Clone the "AWS-Cluster-Benchmarking" repository to your local machine:
 
@@ -13,11 +11,9 @@ If you want users to use the exact version of the `Pipfile` and its dependencies
    git clone https://github.com/your-username/AWS-Cluster-Benchmarking.git
    ```
 
-   Replace `your-username` with your GitHub username.
+2. **Navigate to Project Directory:**
 
-2. **Navigate to the Project Directory:**
-
-   Change your current directory to the project's root directory:
+   Change your directory to the project's root:
 
    ```bash
    cd AWS-Cluster-Benchmarking
@@ -25,23 +21,21 @@ If you want users to use the exact version of the `Pipfile` and its dependencies
 
 3. **Install Pipenv:**
 
-   Ensure you have Pipenv installed. If not, you can install it using pip (Python's package manager):
+   Install Pipenv if not already installed:
 
    ```bash
    pip install pipenv
    ```
 
-4. **Install Project Dependencies:**
+4. **Install Dependencies:**
 
-   Use Pipenv to install the project dependencies based on the `Pipfile.lock` to ensure you use the exact versions specified in the repository:
+   Use Pipenv to install project dependencies:
 
    ```bash
    pipenv install --ignore-pipfile
    ```
 
-   This command installs the dependencies listed in the `Pipfile.lock` file, ensuring that you use the exact versions specified by the project.
-
-5. **Activate the Virtual Environment:**
+5. **Activate Virtual Environment:**
 
    Activate the Pipenv virtual environment:
 
@@ -49,4 +43,17 @@ If you want users to use the exact version of the `Pipfile` and its dependencies
    pipenv shell
    ```
 
-   You are now within the project's virtual environment, where you can run your Python scripts and manage dependencies.
+   You're now in the project's virtual environment, ready to run Python scripts and manage dependencies.
+
+# Adding AWS Credentials
+
+To use this project with AWS services:
+
+1. **Create AWS Credentials File:**
+
+   - Copy `aws_credentials_template.txt` and rename it to `aws_credentials.txt`.
+
+2. **Edit `aws_credentials.txt`:**
+
+   - Replace placeholders with your AWS credentials and region.
+   - Do not commit this file to Git.
