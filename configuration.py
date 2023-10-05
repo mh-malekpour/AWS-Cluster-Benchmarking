@@ -1,8 +1,15 @@
-REGION = 'us-east-1'
-aws_access_key_id="ASIASRQQNEZNEEUCRCOK"
-aws_secret_access_key="l6zAzceotvgLDhYidV4taatiPOTihn9xtuLf9S5L"
-aws_session_token="FwoGZXIvYXdzEFoaDLh8+kQWF1Nam1DSFiLPAZafvHUSyMxgwNtW7fM3R/ejWN6MceJZ1CIzM48jD+nk7uixxaDxAj0Xfiw6EpKS2F4v2pCuaKjmjNZtliBJtkzDE/9eNBOrneeAr30LLH2PzVuuY2Tql8R5/6WklyKyJsRSLsaf8t5serzCVNJnsjivbttem5R5Jr+Pnwwi9Lz8nVrKiACTt7i2lutaOvouOzhnmqGwrEv/NUI2XfiSABMBxt3jwwj/iyL+XB7Q79es55qQbJSVpoKLZhfZ9PBKWSpjyICINgkg+KPFUgavyijsg/ioBjItPFCb7aFpwU8uF+abGBXJiVuq8otqz0RKkMQUj7miZcz++whHur1wquLm63xT"
+# Read AWS credentials from the aws_credentials.txt file
+with open('aws_credentials.txt', 'r') as file:
+    lines = file.readlines()
+    aws_credentials = {}
+    for line in lines:
+        key, value = line.strip().split('=')
+        aws_credentials[key] = value
 
+REGION = aws_credentials.get('region', 'us-east-1')
+aws_access_key_id = aws_credentials['aws_access_key_id'],
+aws_secret_access_key = aws_credentials['aws_secret_access_key'],
+aws_session_token = aws_credentials.get('aws_session_token', None),
 
 TAGS = {
                 'ResourceType': 'instance',
