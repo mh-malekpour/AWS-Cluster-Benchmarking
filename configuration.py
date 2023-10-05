@@ -7,9 +7,9 @@ with open('aws_credentials.txt', 'r') as file:
         aws_credentials[key] = value
 
 REGION = aws_credentials.get('region', 'us-east-1')
-aws_access_key_id = aws_credentials['aws_access_key_id'],
-aws_secret_access_key = aws_credentials['aws_secret_access_key'],
-aws_session_token = aws_credentials.get('aws_session_token', None),
+aws_access_key_id = aws_credentials['aws_access_key_id']
+aws_secret_access_key = aws_credentials['aws_secret_access_key']
+aws_session_token = aws_credentials.get('aws_session_token', None)
 
 TAGS = {
                 'ResourceType': 'instance',

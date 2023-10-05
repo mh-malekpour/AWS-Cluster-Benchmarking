@@ -14,6 +14,9 @@ pip install pipenv
 
 # 4. Install Dependencies:
 pipenv install --ignore-pipfile
+
+# 5. Activate Pipenv Shell:
+pipenv shell
 ```
 You're now in the project's virtual environment, ready to run Python scripts and manage dependencies.
 
