@@ -26,7 +26,6 @@ EC2_CONFIG= {
     'service_name': 'ec2', 
     'security_group': 'my_sec_group', 
     'key_pair' : 'my_key_pair', 
-    'image_id' : 'ami-02538f8925e3aa27a', # get this using a commad run in aws
     'clustor_1':{
         'instance_type': 'm4.large', 
         'availability_zone': 'us-east-1a'
@@ -34,7 +33,7 @@ EC2_CONFIG= {
     }, 
     'clustor_2':{
         'instance_type': 't2.large', 
-        'availability_zone' : 'us-east-1b'
+        'availability_zone' : 'us-east-1a'
     }
 }
 
