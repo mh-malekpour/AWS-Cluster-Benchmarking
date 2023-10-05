@@ -2,50 +2,22 @@
 Cluster Benchmarking using EC2 Virtual Machines and Elastic Load Balancer (ELB)
 
 ## Project Environment Setup
+```bash
+# 1. Clone Repository:
+git clone https://github.com/your-username/AWS-Cluster-Benchmarking.git
 
-1. **Clone Repository:**
+# 2. Navigate to Project Directory:
+cd AWS-Cluster-Benchmarking
 
-   Clone the "AWS-Cluster-Benchmarking" repository to your local machine:
+# 3. Install Pipenv:
+pip install pipenv
 
-   ```bash
-   git clone https://github.com/your-username/AWS-Cluster-Benchmarking.git
-   ```
+# 4. Install Dependencies:
+pipenv install --ignore-pipfile
+```
+You're now in the project's virtual environment, ready to run Python scripts and manage dependencies.
 
-2. **Navigate to Project Directory:**
-
-   Change your directory to the project's root:
-
-   ```bash
-   cd AWS-Cluster-Benchmarking
-   ```
-
-3. **Install Pipenv:**
-
-   Install Pipenv if not already installed:
-
-   ```bash
-   pip install pipenv
-   ```
-
-4. **Install Dependencies:**
-
-   Use Pipenv to install project dependencies:
-
-   ```bash
-   pipenv install --ignore-pipfile
-   ```
-
-5. **Activate Virtual Environment:**
-
-   Activate the Pipenv virtual environment:
-
-   ```bash
-   pipenv shell
-   ```
-
-   You're now in the project's virtual environment, ready to run Python scripts and manage dependencies.
-
-# Adding AWS Credentials
+## Adding AWS Credentials
 
 To use this project with AWS services:
 
