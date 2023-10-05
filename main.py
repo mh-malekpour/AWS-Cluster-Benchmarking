@@ -3,7 +3,7 @@ import time
 from configuration import EC2_CONFIG, ELB_CONFIG, IAM_CONFIG, TAGS, PROFILE
 from configuration import REGION, aws_access_key_id, aws_secret_access_key, aws_session_token
 from aws_service_utils import create_aws_service
-from ec2_utils import get_vpc, get_subnet, create_security_group, set_security_group_rules, create_key_pair, \
+from ec2_utils import create_vpc, create_subnet, create_security_group, set_security_group_rules, create_key_pair, \
     lunch_ec2_instance
 from elb_utils import create_target_group, register_targets
 
@@ -37,14 +37,11 @@ if __name__ == "__main__":
                              session_token=args.aws_access_secret_token)
 
     # step 2: create vpc, subnet, security group and set ip rules
-    vpc_id = get_vpc(ec2, cidr_block='10.0.0.0/16')
-    subnet_id = get_subnet(ec2, vpc_id, cidr_block='10.0.1.0/24', availability_zone='us-east-1a')
-
+    vpc_id = create_vpc(ec2, cidr_block='10.0.0.0/16')
+    subnet_id = create_subnet(ec2, vpc_id, cidr_block='10.0.1.0/24', availability_zone='us-east-1a')
     sec_group_id = create_security_group(ec2=ec2, vpc_id=vpc_id, group_name=EC2_CONFIG['security_group'])
-    # sec_group_id = "sg-0c224111622a5082f"
     set_security_group_rules(ec2=ec2, sec_group_id=sec_group_id)
     key_id = create_key_pair(ec2=ec2, key_name=EC2_CONFIG['key_pair'])
-    # key_id = 'key-0f03a7f9d35b36a00'
 
     # step 3: create instances and lunch 
     instances_cluster_1 = []
@@ -65,7 +62,7 @@ if __name__ == "__main__":
         )
         instances_cluster_1.append(id_instance)
 
-    for i in range(4):
+    for i in range(5):
         tag = TAGS
         tag['Tags'][0]['Value'] = str(2)
         tag['Tags'][1]['Value'] = str(i)

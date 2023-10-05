@@ -1,4 +1,4 @@
-def get_vpc(ec2, cidr_block):
+def create_vpc(ec2, cidr_block):
     # Ensure a VPC with the specified CIDR block exists. If it doesn't, create it.
     vpcs = ec2.describe_vpcs(Filters=[{'Name': 'cidr', 'Values': [cidr_block]}])
 
@@ -9,7 +9,7 @@ def get_vpc(ec2, cidr_block):
         return vpc['Vpc']['VpcId']
 
 
-def get_subnet(ec2, vpc_id, cidr_block, availability_zone):
+def create_subnet(ec2, vpc_id, cidr_block, availability_zone):
     # Ensure a subnet with the specified CIDR block within the given VPC exists. If it doesn't, create it.
     subnets = ec2.describe_subnets(
         Filters=[{'Name': 'cidr-block', 'Values': [cidr_block]}, {'Name': 'vpc-id', 'Values': [vpc_id]}])
@@ -30,13 +30,18 @@ def create_key_pair(ec2, key_name):
 
 
 def create_security_group(ec2, vpc_id, group_name):
-    response = ec2.create_security_group(
-        GroupName=group_name,
-        Description='tmp',
-        VpcId=vpc_id
-    )
-    security_group_id = response['GroupId']
-    return security_group_id
+    # Ensure a security group with the specified name exists within the given VPC. If it doesn't, create it.
+    security_groups = ec2.describe_security_groups(Filters=[{'Name': 'group-name', 'Values': [group_name]}, {'Name': 'vpc-id', 'Values': [vpc_id]}])
+
+    if security_groups and security_groups.get('SecurityGroups'):
+        return security_groups['SecurityGroups'][0]['GroupId']
+    else:
+        response = ec2.create_security_group(
+            GroupName=group_name,
+            Description=f'{group_name} security group',
+            VpcId=vpc_id
+        )
+        return response['GroupId']
 
 
 def set_security_group_rules(ec2, sec_group_id):
