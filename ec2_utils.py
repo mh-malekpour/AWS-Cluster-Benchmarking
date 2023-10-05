@@ -22,15 +22,22 @@ def create_subnet(ec2, vpc_id, cidr_block, availability_zone):
 
 
 def create_key_pair(ec2, key_name):
-    with open('my_keypair.pem', 'w') as file:
+    # Ensure a key pair with the specified name exists. If it doesn't, create it and save the private key."""
+    try:
+        key_pairs = ec2.describe_key_pairs(KeyNames=[key_name])
+        if key_pairs and key_pairs.get('KeyPairs'):
+            return key_pairs['KeyPairs'][0]['KeyName']
+    except ec2.exceptions.ClientError as e:
+        pass
+
+    with open(f'{key_name}.pem', 'w') as file:
         key_pair = ec2.create_key_pair(KeyName=key_name, KeyType='rsa', KeyFormat='pem')
         file.write(key_pair.get('KeyMaterial'))
-    key_pair_id = key_pair.get('KeyPairId')
-    return key_pair_id
+    return key_pair.get('KeyName')
 
 
 def create_security_group(ec2, vpc_id, group_name):
-    # Ensure a security group with the specified name exists within the given VPC. If it doesn't, create it.
+    # Ensure a security group with the specified name exists, If it doesn't, create it. Then setting up rules.
     security_groups = ec2.describe_security_groups(Filters=[{'Name': 'group-name', 'Values': [group_name]}, {'Name': 'vpc-id', 'Values': [vpc_id]}])
 
     if security_groups and security_groups.get('SecurityGroups'):
@@ -41,20 +48,18 @@ def create_security_group(ec2, vpc_id, group_name):
             Description=f'{group_name} security group',
             VpcId=vpc_id
         )
+        # Setting up rules
+        ec2.authorize_security_group_ingress(
+            GroupId=response['GroupId'],
+            IpPermissions=[
+                {'IpProtocol': 'tcp',
+                 'FromPort': 80,
+                 'ToPort': 80,
+                 'IpRanges': [{'CidrIp': '0.0.0.0/0'}]
+                 },
+            ]
+        )
         return response['GroupId']
-
-
-def set_security_group_rules(ec2, sec_group_id):
-    ec2.authorize_security_group_ingress(
-        GroupId=sec_group_id,
-        IpPermissions=[
-            {'IpProtocol': 'tcp',
-             'FromPort': 80,
-             'ToPort': 80,
-             'IpRanges': [{'CidrIp': '0.0.0.0/0'}]
-             },
-        ]
-    )
 
 
 def lunch_ec2_instance(ec2, image_id, instance_type, key_name, sec_group, zone, profile, tags):

@@ -3,7 +3,7 @@ import time
 from configuration import EC2_CONFIG, ELB_CONFIG, IAM_CONFIG, TAGS, PROFILE
 from configuration import REGION, aws_access_key_id, aws_secret_access_key, aws_session_token
 from aws_service_utils import create_aws_service
-from ec2_utils import create_vpc, create_subnet, create_security_group, set_security_group_rules, create_key_pair, \
+from ec2_utils import create_vpc, create_subnet, create_security_group, create_key_pair, \
     lunch_ec2_instance
 from elb_utils import create_target_group, register_targets
 
@@ -40,7 +40,7 @@ if __name__ == "__main__":
     vpc_id = create_vpc(ec2, cidr_block='10.0.0.0/16')
     subnet_id = create_subnet(ec2, vpc_id, cidr_block='10.0.1.0/24', availability_zone='us-east-1a')
     sec_group_id = create_security_group(ec2=ec2, vpc_id=vpc_id, group_name=EC2_CONFIG['security_group'])
-    set_security_group_rules(ec2=ec2, sec_group_id=sec_group_id)
+    # set_security_group_rules(ec2=ec2, sec_group_id=sec_group_id)
     key_id = create_key_pair(ec2=ec2, key_name=EC2_CONFIG['key_pair'])
 
     # step 3: create instances and lunch 
