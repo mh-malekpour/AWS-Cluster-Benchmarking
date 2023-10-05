@@ -239,3 +239,4 @@ fabric.properties
 
 # AWS Creds
 aws_credentials.txt
+*.pem
