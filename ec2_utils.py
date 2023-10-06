@@ -1,3 +1,4 @@
+import time
 def create_vpc(ec2, cidr_block):
     # Ensure a VPC with the specified CIDR block exists. If it doesn't, create it.
     vpcs = ec2.describe_vpcs(Filters=[{'Name': 'cidr', 'Values': [cidr_block]}])
@@ -83,3 +84,35 @@ def lunch_ec2_instance(ec2, image_id, instance_type, key_name, sec_group, zone, 
     )
     ec2_instance_id = response['Instances'][0]['InstanceId']
     return ec2_instance_id
+
+
+def wait_instances_lunch(ec2, instances_ids):
+    waiter = ec2.get_waiter('instance_status_ok')
+    for instance_id in instances_ids:
+        try:
+            waiter.wait(
+                    InstanceIds=[instance_id],
+                    WaiterConfig={'Delay': 10}  
+            )
+        except Exception as e:
+            time.sleep(300)
+
+
+
+
+def get_subnet_ids(ec2, vpc_id, availability_zone):
+    response = ec2.describe_subnets(
+            Filters=[
+                {
+                    'Name': 'vpc-id',
+                    'Values': [vpc_id],
+                },
+                {
+                    'Name': 'availability-zone',
+                    'Values': availability_zone,
+                }
+            ]
+        )
+   
+    subnet_ids = [subnet['SubnetId'] for subnet in response['Subnets']]
+    return subnet_ids

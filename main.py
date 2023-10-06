@@ -4,8 +4,9 @@ from configuration import EC2_CONFIG, ELB_CONFIG, IAM_CONFIG, TAGS, PROFILE
 from configuration import REGION, aws_access_key_id, aws_secret_access_key, aws_session_token
 from aws_service_utils import create_aws_service
 from ec2_utils import create_vpc, create_subnet, create_security_group, create_key_pair, \
-    lunch_ec2_instance
-from elb_utils import create_target_group, register_targets
+    lunch_ec2_instance, wait_instances_lunch, get_subnet_ids
+from elb_utils import create_target_group, register_targets, create_app_lb, create_alb_listener, \
+    create_alb_list_rule 
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--region', default=REGION, type=str)
@@ -42,6 +43,7 @@ if __name__ == "__main__":
     sec_group_id = create_security_group(ec2=ec2, vpc_id=vpc_id, group_name=EC2_CONFIG['security_group'])
     # set_security_group_rules(ec2=ec2, sec_group_id=sec_group_id)
     key_id = create_key_pair(ec2=ec2, key_name=EC2_CONFIG['key_pair'])
+    
 
     # step 3: create instances and lunch 
     instances_cluster_1 = []
@@ -77,12 +79,39 @@ if __name__ == "__main__":
             tags=[tag]
         )
         instances_cluster_2.append(id_instance)
+    print(instances_cluster_1)
+    print(instances_cluster_2)
+    # wait untill all created intances are running
+    wait_instances_lunch(ec2=ec2, instances_ids=instances_cluster_1)
+    wait_instances_lunch(ec2=ec2, instances_ids=instances_cluster_2)
 
-    time.sleep(1000)  # we need to wait for instances to be created
 
     # step4 : create target groups and assign instances so tht we can the can have clusters
     t_group_1 = create_target_group(elb, ELB_CONFIG['cluster1']['t_group_name'], vpc_id)
     t_group_2 = create_target_group(elb, ELB_CONFIG['cluster2']['t_group_name'], vpc_id)
 
-    register_targets(elb=elb, t_group=t_group_1, instance_ids=instances_cluster_1)
+
+    #register_targets(elb=elb, t_group=t_group_1, instance_ids=instances_cluster_1)
     register_targets(elb=elb, t_group=t_group_2, instance_ids=instances_cluster_2)
+
+    subnet_id = get_subnet_ids(ec2=ec2, vpc_id=vpc_id, availability_zone=[EC2_CONFIG['clustor_1']['availability_zone'], EC2_CONFIG['clustor_2']['availability_zone']])
+    alb_arn, alb_dns_name = create_app_lb(elb=elb,lb_name=ELB_CONFIG['mame'], sec_group_ids={sec_group_id}, subnets=subnet_id)
+
+    alb_listener_arn = create_alb_listener(elb, alb_arn, [t_group_1, t_group_2])
+    alb_list_rule_1_arn = create_alb_list_rule(
+        elb,
+        alb_listener_arn,
+        t_group_1,
+        ELB_CONFIG['Cluster1']['PathPattern'],
+        ELB_CONFIG['Cluster1']['RulePriority']
+    )
+
+    # Create rule 2 in the last listener to forward requests to cluster 2
+    alb_list_rule_2_arn = create_alb_list_rule(
+        elb,
+        alb_listener_arn,
+        t_group_1,
+        ELB_CONFIG['Cluster2']['PathPattern'],
+        ELB_CONFIG['Cluster2']['RulePriority']
+    )
+
