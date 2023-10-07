@@ -38,12 +38,17 @@ EC2_CONFIG= {
 }
 
 ELB_CONFIG = {
+    'mame': 'my_load_balancer',
     'service_name': 'elbv2',
     'cluster1': {
         't_group_name': 'cluster1',
+        'PathPattern': '/cluster1*',
+        'RulePriority': 1
     },
     'cluster2': {
         't_group_name': 'cluster2',
+        'PathPattern': '/cluster1*',
+        'RulePriority': 1
     }
 }
 
