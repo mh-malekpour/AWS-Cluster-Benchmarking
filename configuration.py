@@ -11,6 +11,7 @@ aws_access_key_id = aws_credentials['aws_access_key_id']
 aws_secret_access_key = aws_credentials['aws_secret_access_key']
 aws_session_token = aws_credentials.get('aws_session_token', None)
 
+# Tag template for the target groups (i.e the clusters)
 TAGS = {
                 'ResourceType': 'instance',
                 'Tags': [
@@ -20,25 +21,26 @@ TAGS = {
             }
         
 
+# The profile
 PROFILE ='LabInstanceProfile'
 
 EC2_CONFIG= {
     'service_name': 'ec2', 
     'security_group': 'my_sec_group', 
     'key_pair' : 'my_key_pair', 
-    'clustor_1':{
+    'cluster_1':{
         'instance_type': 'm4.large', 
         'availability_zone': 'us-east-1a'
 
     }, 
-    'clustor_2':{
+    'cluster_2':{
         'instance_type': 't2.large', 
-        'availability_zone' : 'us-east-1a'
+        'availability_zone' : 'us-east-1b'
     }
 }
 
 ELB_CONFIG = {
-    'mame': 'my_load_balancer',
+    'mame': 'my-load-balancer',
     'service_name': 'elbv2',
     'cluster1': {
         't_group_name': 'cluster1',
@@ -54,5 +56,38 @@ ELB_CONFIG = {
 
 
 IAM_CONFIG = {
-    'service_name': 'iam'
+    'service_name': 'iam',
+    'role' : 'LabRole'
+}
+
+
+CODE_DEPLOY_CONFIG = {
+    'service_name': 'codedeploy',
+    'application_name' : 'lab1_app', 
+    'github_repo_config' : {
+        'repository': '',
+        'commitId': ''  
+    },
+     'cluster1': {
+        'dep_group_name': 'cluster1',
+        'tag_filters': [
+            {
+                'Key': 'cluster',
+                'Value': '1',
+                'Type': 'KEY_AND_VALUE'
+            },
+        ]
+    },
+    'cluster2': {
+        'dep_group_name': 'cluster2',
+        'tag_filters': [
+            {
+                'Key': 'cluster',
+                'Value': '2',
+                'Type': 'KEY_AND_VALUE'
+            },
+        ]
+    }
+    
+
 }
