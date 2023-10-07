@@ -241,3 +241,4 @@ fabric.properties
 aws_credentials.txt
 *.pem
 aws_config.json
+*.ipynb
