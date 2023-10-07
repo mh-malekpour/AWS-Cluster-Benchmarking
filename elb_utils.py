@@ -1,4 +1,11 @@
+"""
+Utils file for ELB(Elastic load balancer servcie)
+"""
+
 def create_target_group(elb, t_group, vpc_id):
+    """
+    It creates the target group 
+    """
     response = elb.create_target_group(
             Name=t_group,
             Protocol='HTTP',
@@ -9,11 +16,14 @@ def create_target_group(elb, t_group, vpc_id):
             TargetType='instance',
             IpAddressType='ipv4'
         )
-    print(response)
     t_group = response['TargetGroups'][0]['TargetGroupArn']
+    print(f'Target group created {t_group}')
     return t_group
 
 def register_targets(elb, t_group, instance_ids):
+    """
+    It registers the instaces to the target groupm i.e. ceates the clusters
+    """
     elb.register_targets(
             TargetGroupArn=t_group,
             Targets=[{'Id': ec2_instance_id, 'Port': 80} for ec2_instance_id in instance_ids]
@@ -21,7 +31,10 @@ def register_targets(elb, t_group, instance_ids):
 
 
 def create_app_lb(elb, lb_name, subnets, sec_group_ids):
-        response = elb.create_load_balancer(
+    """
+    It creates the application load balancer
+    """
+    response = elb.create_load_balancer(
             Name=lb_name,
             Subnets=subnets,
             SecurityGroups=sec_group_ids,
@@ -30,14 +43,17 @@ def create_app_lb(elb, lb_name, subnets, sec_group_ids):
             IpAddressType='ipv4'
         )
 
-        alb_arn = response['LoadBalancers'][0]['LoadBalancerArn']
-        alb_dns_name = response['LoadBalancers'][0]['DNSName']
-        return alb_arn, alb_dns_name
+    alb_arn = response['LoadBalancers'][0]['LoadBalancerArn']
+    alb_dns_name = response['LoadBalancers'][0]['DNSName']
+    return alb_arn, alb_dns_name
 
 
 
 def create_alb_listener(elb, alb_arn, t_group_arns):
-        response = elb.create_listener(
+    """
+    creates the alb_listener
+    """
+    response = elb.create_listener(
             LoadBalancerArn=alb_arn,
             Protocol='HTTP',
             Port=80,
@@ -60,13 +76,16 @@ def create_alb_listener(elb, alb_arn, t_group_arns):
             ]
         )
 
-        alb_listener_arn = response['Listeners'][0]['ListenerArn']
-        print(f'ALB listener created successfully.\n{alb_listener_arn}')
-        return alb_listener_arn
+    alb_listener_arn = response['Listeners'][0]['ListenerArn']
+    print(f'ALB listener created {alb_listener_arn}')
+    return alb_listener_arn
 
 
 def create_alb_list_rule(elb, alb_listener_arn,target_group_arn,path_pattern,priority):
-        response = elb.create_rule(
+    """
+    It creates the alb rule for the listner
+    """
+    response = elb.create_rule(
             ListenerArn=alb_listener_arn,
             Conditions=[
                 {
@@ -85,5 +104,5 @@ def create_alb_list_rule(elb, alb_listener_arn,target_group_arn,path_pattern,pri
             ]
         )
 
-        alb_listener_rule_arn = response['Rules'][0]['RuleArn']
-        return alb_listener_rule_arn
+    alb_listener_rule_arn = response['Rules'][0]['RuleArn']
+    return alb_listener_rule_arn
