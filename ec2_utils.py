@@ -63,14 +63,52 @@ def create_security_group(ec2, vpc_id, group_name):
         return response['GroupId']
 
 
-def lunch_ec2_instance(ec2, image_id, instance_type, key_name, sec_group, zone, profile, tags):
+def get_latest_amazon_linux_2_image_id(ec2):
+    # Filter for Amazon Linux 2 AMIs
+    filters = [
+        {
+            'Name': 'name',
+            'Values': ['amzn2-ami-hvm-*']
+        },
+        {
+            'Name': 'architecture',
+            'Values': ['x86_64']
+        },
+        {
+            'Name': 'root-device-type',
+            'Values': ['ebs']
+        },
+        {
+            'Name': 'virtualization-type',
+            'Values': ['hvm']
+        },
+        {
+            'Name': 'image-type',
+            'Values': ['machine']
+        }
+    ]
+
+    # Describe images and get the latest one
+    response = ec2.describe_images(Owners=['amazon'], Filters=filters)
+
+    # Sort images by creation date
+    images = sorted(response['Images'], key=lambda x: x['CreationDate'], reverse=True)
+
+    # Return the latest image's ID
+    if images:
+        return images[0]['ImageId']
+    else:
+        return None
+
+
+def lunch_ec2_instance(ec2, image_id, instance_type, key_name, sec_group_ids, zone, profile, subnet_id, tags):
     response = ec2.run_instances(
         ImageId=image_id,
         MinCount=1,
         MaxCount=1,
         InstanceType=instance_type,
         KeyName=key_name,
-        SecurityGroups=[sec_group],
+        SecurityGroupIds=[sec_group_ids],
         Placement={
             'AvailabilityZone': zone
         },
@@ -80,7 +118,8 @@ def lunch_ec2_instance(ec2, image_id, instance_type, key_name, sec_group, zone, 
         },
         MetadataOptions={
             'InstanceMetadataTags': 'enabled'
-        }
+        },
+        SubnetId=subnet_id
     )
     ec2_instance_id = response['Instances'][0]['InstanceId']
     return ec2_instance_id

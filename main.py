@@ -4,7 +4,7 @@ from configuration import EC2_CONFIG, ELB_CONFIG, IAM_CONFIG, TAGS, PROFILE
 from configuration import REGION, aws_access_key_id, aws_secret_access_key, aws_session_token
 from aws_service_utils import create_aws_service
 from ec2_utils import create_vpc, create_subnet, create_security_group, create_key_pair, \
-    lunch_ec2_instance, wait_instances_lunch, get_subnet_ids
+    lunch_ec2_instance, wait_instances_lunch, get_subnet_ids, get_latest_amazon_linux_2_image_id
 from elb_utils import create_target_group, register_targets, create_app_lb, create_alb_listener, \
     create_alb_list_rule 
 
@@ -39,11 +39,10 @@ if __name__ == "__main__":
 
     # step 2: create vpc, subnet, security group and set ip rules
     vpc_id = create_vpc(ec2, cidr_block='10.0.0.0/16')
-    subnet_id = create_subnet(ec2, vpc_id, cidr_block='10.0.1.0/24', availability_zone='us-east-1a')
+    subnet_id = create_subnet(ec2, vpc_id, cidr_block='10.0.1.0/24', availability_zone='us-east-1')
     sec_group_id = create_security_group(ec2=ec2, vpc_id=vpc_id, group_name=EC2_CONFIG['security_group'])
-    # set_security_group_rules(ec2=ec2, sec_group_id=sec_group_id)
     key_id = create_key_pair(ec2=ec2, key_name=EC2_CONFIG['key_pair'])
-    
+    image_id = get_latest_amazon_linux_2_image_id(ec2=ec2)
 
     # step 3: create instances and lunch 
     instances_cluster_1 = []
@@ -57,10 +56,11 @@ if __name__ == "__main__":
             image_id=EC2_CONFIG['image_id'],
             instance_type=EC2_CONFIG['clustor_1']['instance_type'],
             key_name=EC2_CONFIG['key_pair'],
-            sec_group=EC2_CONFIG['security_group'],
             zone=EC2_CONFIG['clustor_1']['availability_zone'],
             profile=PROFILE,
-            tags=[tag]
+            tags=[tag],
+            sec_group_ids=sec_group_id,
+            subnet_id=subnet_id
         )
         instances_cluster_1.append(id_instance)
 
@@ -73,25 +73,26 @@ if __name__ == "__main__":
             image_id=EC2_CONFIG['image_id'],
             instance_type=EC2_CONFIG['clustor_2']['instance_type'],
             key_name=EC2_CONFIG['key_pair'],
-            sec_group=EC2_CONFIG['security_group'],
             zone=EC2_CONFIG['clustor_2']['availability_zone'],
             profile=PROFILE,
-            tags=[tag]
+            tags=[tag],
+            sec_group_ids=sec_group_id,
+            subnet_id=subnet_id
         )
         instances_cluster_2.append(id_instance)
     print(instances_cluster_1)
     print(instances_cluster_2)
+    
     # wait untill all created intances are running
     wait_instances_lunch(ec2=ec2, instances_ids=instances_cluster_1)
     wait_instances_lunch(ec2=ec2, instances_ids=instances_cluster_2)
-
 
     # step4 : create target groups and assign instances so tht we can the can have clusters
     t_group_1 = create_target_group(elb, ELB_CONFIG['cluster1']['t_group_name'], vpc_id)
     t_group_2 = create_target_group(elb, ELB_CONFIG['cluster2']['t_group_name'], vpc_id)
 
 
-    #register_targets(elb=elb, t_group=t_group_1, instance_ids=instances_cluster_1)
+    register_targets(elb=elb, t_group=t_group_1, instance_ids=instances_cluster_1)
     register_targets(elb=elb, t_group=t_group_2, instance_ids=instances_cluster_2)
 
     subnet_id = get_subnet_ids(ec2=ec2, vpc_id=vpc_id, availability_zone=[EC2_CONFIG['clustor_1']['availability_zone'], EC2_CONFIG['clustor_2']['availability_zone']])
