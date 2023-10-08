@@ -40,7 +40,7 @@ EC2_CONFIG= {
 }
 
 ELB_CONFIG = {
-    'mame': 'my-load-balancer',
+    'name': 'my-load-balancer',
     'service_name': 'elbv2',
     'cluster1': {
         't_group_name': 'cluster1',
