@@ -50,16 +50,16 @@ def create_key_pair(ec2, key_name):
     try:
         key_pairs = ec2.describe_key_pairs(KeyNames=[key_name])
         if key_pairs and key_pairs.get('KeyPairs'):
-            key_pair_id= key_pairs['KeyPairs'][0]['KeyName']
-        else:
-                with open(f'{key_name}.pem', 'w') as file:
-                    key_pair = ec2.create_key_pair(KeyName=key_name, KeyType='rsa', KeyFormat='pem')
-                    file.write(key_pair.get('KeyMaterial'))
-                    key_pair_id =  key_pair.get('KeyName')
+            key_pair_id = key_pairs['KeyPairs'][0]['KeyName']
+            print(f'Key pair created {key_pair_id}')
+            return key_pair_id
     except ec2.exceptions.ClientError as e:
         pass
 
-
+    with open(f'{key_name}.pem', 'w') as file:
+        key_pair = ec2.create_key_pair(KeyName=key_name, KeyType='rsa', KeyFormat='pem')
+        file.write(key_pair.get('KeyMaterial'))
+        key_pair_id = key_pair.get('KeyName')
     print(f'Key pair created {key_pair_id}')
     return key_pair_id
 
