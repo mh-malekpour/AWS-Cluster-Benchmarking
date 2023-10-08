@@ -238,7 +238,7 @@ fabric.properties
 .idea/caches/build_file_checksums.ser
 
 # AWS Creds
-aws_credentials.txt
+aws/aws_credentials.txt
 *.pem
-aws_config.json
+aws/aws_config.json
 *.ipynb
