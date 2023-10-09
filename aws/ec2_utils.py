@@ -83,11 +83,9 @@ def create_security_group(ec2, vpc_id, group_name):
         ec2.authorize_security_group_ingress(
             GroupId=response['GroupId'],
             IpPermissions=[
-                {'IpProtocol': 'tcp',
-                 'FromPort': 80,
-                 'ToPort': 80,
-                 'IpRanges': [{'CidrIp': '0.0.0.0/0'}]
-                 },
+                {'IpProtocol': 'tcp', 'FromPort': 80, 'ToPort': 80, 'IpRanges': [{'CidrIp': '0.0.0.0/0'}]},
+                {'IpProtocol': 'tcp', 'FromPort': 22, 'ToPort': 22, 'IpRanges': [{'CidrIp': '0.0.0.0/0'}]},
+                {'IpProtocol': 'tcp', 'FromPort': 443, 'ToPort': 443, 'IpRanges': [{'CidrIp': '0.0.0.0/0'}]},
             ]
         )
         group_id= response['GroupId']
