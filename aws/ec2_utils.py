@@ -56,7 +56,7 @@ def create_key_pair(ec2, key_name):
     except ec2.exceptions.ClientError as e:
         pass
 
-    with open(f'{key_name}.pem', 'w') as file:
+    with open(f'aws/{key_name}.pem', 'w') as file:
         key_pair = ec2.create_key_pair(KeyName=key_name, KeyType='rsa', KeyFormat='pem')
         file.write(key_pair.get('KeyMaterial'))
         key_pair_id = key_pair.get('KeyName')
@@ -137,7 +137,7 @@ def get_latest_amazon_linux_2_image_id(ec2):
         return None
 
 
-def lunch_ec2_instance(ec2, image_id, instance_type, key_name, sec_group_ids, zone, profile, subnet_id, tags):
+def lunch_ec2_instance(ec2, image_id, instance_type, key_name, sec_group_ids, zone, profile, subnet_id, tags, script):
     """
     It instatiates and lunches the ec2 instance
     """
@@ -158,7 +158,8 @@ def lunch_ec2_instance(ec2, image_id, instance_type, key_name, sec_group_ids, zo
         MetadataOptions={
             'InstanceMetadataTags': 'enabled'
         },
-        SubnetId=subnet_id
+        SubnetId=subnet_id,
+        UserData=script
     )
     ec2_instance_id = response['Instances'][0]['InstanceId']
     print(f'Instance lunched {ec2_instance_id}')

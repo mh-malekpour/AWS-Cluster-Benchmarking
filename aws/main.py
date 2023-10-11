@@ -1,3 +1,4 @@
+import os
 import argparse
 from configuration import EC2_CONFIG, ELB_CONFIG, IAM_CONFIG, TAGS, PROFILE, CODE_DEPLOY_CONFIG, IAM_CONFIG
 from configuration import REGION, aws_access_key_id, aws_secret_access_key, aws_session_token
@@ -67,6 +68,9 @@ if __name__ == "__main__":
     instances_cluster_1 = []
     instances_cluster_2 = []
 
+    # User Data executes the bash script on instance start
+    user_data_script = open('flask/install.sh', 'r').read()
+
     for i in range(4):
         tag = TAGS
         tag['Tags'][0]['Value'] = str(1)
@@ -80,7 +84,8 @@ if __name__ == "__main__":
             profile=PROFILE,
             tags=[tag],
             sec_group_ids=sec_group_id,
-            subnet_id=subnet_id1
+            subnet_id=subnet_id1,
+            script=user_data_script
         )
         instances_cluster_1.append(id_instance)
 
@@ -97,7 +102,8 @@ if __name__ == "__main__":
             profile=PROFILE,
             tags=[tag],
             sec_group_ids=sec_group_id,
-            subnet_id=subnet_id2
+            subnet_id=subnet_id2,
+            script=user_data_script
         )
         instances_cluster_2.append(id_instance)
 
@@ -106,7 +112,6 @@ if __name__ == "__main__":
     # wait untill all created intances are running
     wait_instances_lunch(ec2=ec2, instances_ids=instances_cluster_1)
     wait_instances_lunch(ec2=ec2, instances_ids=instances_cluster_2)
-    
 
     # step4 : create target groups and assign instances so tht we can the can have clusters
     t_group_1 = create_target_group(elb, ELB_CONFIG['cluster1']['t_group_name'], vpc_id)
@@ -164,4 +169,4 @@ if __name__ == "__main__":
 
 
     # save aws configuration 
-    save_aws_config(config=aws_config, save_file='aws_config.json')
+    save_aws_config(config=aws_config, save_file='aws/aws_config.json')

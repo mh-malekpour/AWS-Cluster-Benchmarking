@@ -1,5 +1,5 @@
 # Read AWS credentials from the aws_credentials.txt file
-with open('aws_credentials.txt', 'r') as file:
+with open('./aws/aws_credentials.txt', 'r') as file:
     lines = file.readlines()
     aws_credentials = {}
     for line in lines:
