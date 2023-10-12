@@ -32,3 +32,9 @@ To use this project with AWS services:
 
    - Replace placeholders with your AWS credentials and region.
    - Do not commit this file to Git.
+
+## Setup AWS Infrastructure
+To set up AWS infrastructure for the project, run the following Python script:
+```bash
+python aws/main.py
+```
