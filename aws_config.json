@@ -1,0 +1,22 @@
+{
+    "vpc_id": "vpc-06c7dfffea35c7c9f",
+    "sec_group_id": "sg-0beac6d115e86348a",
+    "key_id": "my_key_pair",
+    "image_id": "ami-0d887a308369b6881",
+    "subnet_id1": "subnet-0f90bf8dd82b2e940",
+    "subnet_id2": "subnet-0fae49c7ef937a55c",
+    "t_group_1": "arn:aws:elasticloadbalancing:us-east-1:175054333530:targetgroup/cluster1/017a20a52374a68f",
+    "t_group_2": "arn:aws:elasticloadbalancing:us-east-1:175054333530:targetgroup/cluster2/19b6fa451b49866b",
+    "subnet_id": [
+        "subnet-0f90bf8dd82b2e940",
+        "subnet-0fae49c7ef937a55c"
+    ],
+    "alb_arn": "arn:aws:elasticloadbalancing:us-east-1:175054333530:loadbalancer/app/my-load-balancer/eb514ba4cb2f8031",
+    "alb_dns_name": "my-load-balancer-1019330376.us-east-1.elb.amazonaws.com",
+    "alb_listener_arn": "arn:aws:elasticloadbalancing:us-east-1:175054333530:listener/app/my-load-balancer/eb514ba4cb2f8031/f6a60c0e075e8022",
+    "alb_list_rule_1_arn": "arn:aws:elasticloadbalancing:us-east-1:175054333530:listener-rule/app/my-load-balancer/eb514ba4cb2f8031/f6a60c0e075e8022/bb84493475790949",
+    "alb_list_rule_2_arn": "arn:aws:elasticloadbalancing:us-east-1:175054333530:listener-rule/app/my-load-balancer/eb514ba4cb2f8031/f6a60c0e075e8022/bb84493475790949",
+    "role_arn": "arn:aws:iam::175054333530:role/LabRole",
+    "app_id": "f231f180-3a4c-49b1-aa73-c27ede3daade",
+    "dep_group1": "990c80d8-fda6-4da9-ab22-fee8a49a1050"
+}

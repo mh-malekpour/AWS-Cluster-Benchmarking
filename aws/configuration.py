@@ -13,29 +13,29 @@ aws_session_token = aws_credentials.get('aws_session_token', None)
 
 # Tag template for the target groups (i.e the clusters)
 TAGS = {
-                'ResourceType': 'instance',
-                'Tags': [
+    'ResourceType': 'instance',
+    'Tags': [
                     {'Key': 'n_clustor', 'Value': '', },
-                    {'Key': 'n_instance', 'Value': '', }  
-                ]
-            }
-        
+                    {'Key': 'n_instance', 'Value': '', }
+    ]
+}
+
 
 # The profile
-PROFILE ='LabInstanceProfile'
+PROFILE = 'LabInstanceProfile'
 
-EC2_CONFIG= {
-    'service_name': 'ec2', 
-    'security_group': 'my_sec_group', 
-    'key_pair' : 'my_key_pair', 
-    'cluster_1':{
-        'instance_type': 'm4.large', 
+EC2_CONFIG = {
+    'service_name': 'ec2',
+    'security_group': 'my_sec_group2',
+    'key_pair': 'my_key_pair',
+    'cluster_1': {
+        'instance_type': 'm4.large',
         'availability_zone': 'us-east-1a'
 
-    }, 
-    'cluster_2':{
-        'instance_type': 't2.large', 
-        'availability_zone' : 'us-east-1b'
+    },
+    'cluster_2': {
+        'instance_type': 't2.large',
+        'availability_zone': 'us-east-1b'
     }
 }
 
@@ -57,18 +57,30 @@ ELB_CONFIG = {
 
 IAM_CONFIG = {
     'service_name': 'iam',
-    'role' : 'LabRole'
+    'role': 'LabRole'
 }
 
 
 CODE_DEPLOY_CONFIG = {
     'service_name': 'codedeploy',
-    'application_name' : 'lab1_app', 
-    'github_repo_config' : {
-        'repository': '',
-        'commitId': ''  
-    },
-     'cluster1': {
+    'application_name': 'lab1_app',
+    'DeploymentConfigName': 'CodeDeployDefault.OneAtATime',
+    'AutoRollbackConfiguration': {
+            'enabled': True,
+            'events': ['DEPLOYMENT_FAILURE']
+        },
+    'DeploymentStyle': {
+            'deploymentType': 'IN_PLACE',
+            'deploymentOption': 'WITHOUT_TRAFFIC_CONTROL'
+        },
+    'Revision': {
+            'revisionType': 'S3',
+            's3Location': {
+                'key': 'server.zip',
+                'bundleType': 'zip',
+            }
+        },
+    'cluster1': {
         'dep_group_name': 'cluster1',
         'tag_filters': [
             {
@@ -88,6 +100,36 @@ CODE_DEPLOY_CONFIG = {
             },
         ]
     }
-    
+
+
+}
+
+S3_CONFIG = {
+    'service_name': 's3',
+    'bucket': 'log8415-lab1-bucket-',
+    'bucket_policy': {
+        "Statement": [
+            {
+                    "Action": ["s3:PutObject"],
+                    "Effect": "Allow",
+            },
+            {
+                "Action": [
+                    "s3:Get*",
+                    "s3:List*"
+                ],
+                "Effect": "Allow",
+            }
+        ]
+    }
+}
+
+
+STS_CONFIG = {
+    'service_name': 'sts'
+}
+
+CLOUD_WATCH_CONFIG = {
+    'service_name': 'cloudwatch'
 
 }

@@ -158,7 +158,7 @@ def lunch_ec2_instance(ec2, image_id, instance_type, key_name, sec_group_ids, zo
         MetadataOptions={
             'InstanceMetadataTags': 'enabled'
         },
-        SubnetId=subnet_id
+        SubnetId=subnet_id, 
     )
     ec2_instance_id = response['Instances'][0]['InstanceId']
     print(f'Instance lunched {ec2_instance_id}')

@@ -56,16 +56,14 @@ def create_deployment_group(code_deploy, service_role_arn, app_name, dep_group_n
 
 
 
-def create_deployment(code_deploy, app_name, group_name, github_repo_config):
+def create_deployment(code_deploy, bucket, revision, deploy_group_name, app_name):
+    revision['s3Location']['bucket'] = bucket
     response = code_deploy.create_deployment(
-            description=f'Deploy a simple flask server',
+            description=f'Deploy flask server to {deploy_group_name}',
             applicationName=app_name,
-            deploymentGroupName=group_name,
-            revision={
-            'revisionType': 'GitHub',
-            'gitHubLocation': github_repo_config
-            }
+            deploymentGroupName=deploy_group_name,
+            revision=revision
         )
-
     deployment_id = response['deploymentId']
+    print(f'Application deployment launched {deployment_id}')
     return deployment_id

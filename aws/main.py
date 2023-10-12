@@ -1,5 +1,5 @@
 import argparse
-from configuration import EC2_CONFIG, ELB_CONFIG, IAM_CONFIG, TAGS, PROFILE, CODE_DEPLOY_CONFIG, IAM_CONFIG
+from configuration import EC2_CONFIG, ELB_CONFIG, IAM_CONFIG, TAGS, PROFILE, CODE_DEPLOY_CONFIG, IAM_CONFIG, S3_CONFIG, STS_CONFIG, CLOUD_WATCH_CONFIG
 from configuration import REGION, aws_access_key_id, aws_secret_access_key, aws_session_token
 from aws_service_utils import create_aws_service
 from ec2_utils import create_vpc, create_subnet, create_security_group, create_key_pair, \
@@ -9,6 +9,8 @@ from elb_utils import create_target_group, register_targets, create_app_lb, crea
     create_alb_list_rule 
 from ami_utils import get_role
 from code_deploy_utils import create_application, create_deployment, create_deployment_group
+from sts_utils import get_aws_user_account
+from s3_utils import create_bucket, put_bucket_policy, upload_server_app_to_s3_bucket
 from utils import save_aws_config
 
 
@@ -47,7 +49,24 @@ if __name__ == "__main__":
                              secret_access_id=args.aws_key_id,
                              secret_access_key=args.aws_access_key,
                              session_token=args.aws_access_secret_token)
+    sts = create_aws_service(STS_CONFIG['service_name'],
+                             region=args.region,
+                             secret_access_id=args.aws_key_id,
+                             secret_access_key=args.aws_access_key,
+                             session_token=args.aws_access_secret_token)
+    s3 = create_aws_service(S3_CONFIG['service_name'],
+                             region=args.region,
+                             secret_access_id=args.aws_key_id,
+                             secret_access_key=args.aws_access_key,
+                             session_token=args.aws_access_secret_token)
+    cloud_watch = create_aws_service(CLOUD_WATCH_CONFIG['service_name'],
+                             region=args.region,
+                             secret_access_id=args.aws_key_id,
+                             secret_access_key=args.aws_access_key,
+                             session_token=args.aws_access_secret_token)
 
+                             
+                             
     # step 2: create vpc, subnet, security group and set ip rules
     vpc_id = create_vpc(ec2, cidr_block='10.0.0.0/16')
     aws_config['vpc_id'] = vpc_id
@@ -59,6 +78,14 @@ if __name__ == "__main__":
     aws_config['image_id'] = image_id
     subnet_id1 = create_subnet(ec2, vpc_id, cidr_block='10.0.4.0/24', availability_zone='us-east-1a')
     subnet_id2 = create_subnet(ec2, vpc_id, cidr_block='10.0.3.0/24', availability_zone='us-east-1b')
+    ec2.modify_subnet_attribute(
+    SubnetId=subnet_id1,  # Replace with your subnet ID
+    MapPublicIpOnLaunch={'Value': True}
+    )   
+    ec2.modify_subnet_attribute(
+    SubnetId=subnet_id2,  # Replace with your subnet ID
+    MapPublicIpOnLaunch={'Value': True}
+    )   
     aws_config['subnet_id1'] = subnet_id1
     aws_config['subnet_id2'] = subnet_id2
     attach_internet_gateway_to_vpc(ec2, vpc_id) 
@@ -66,8 +93,8 @@ if __name__ == "__main__":
     # step 3: create instances and lunch 
     instances_cluster_1 = []
     instances_cluster_2 = []
-
-    for i in range(4):
+    """
+    for i in range(1):
         tag = TAGS
         tag['Tags'][0]['Value'] = str(1)
         tag['Tags'][1]['Value'] = str(i)
@@ -83,8 +110,11 @@ if __name__ == "__main__":
             subnet_id=subnet_id1
         )
         instances_cluster_1.append(id_instance)
-
-    for i in range(5):
+    """
+     
+    instances_cluster_1  = ['i-0cd8f795d56e534ea']
+    """
+    for i in range(1):
         tag = TAGS
         tag['Tags'][0]['Value'] = str(2)
         tag['Tags'][1]['Value'] = str(i)
@@ -100,7 +130,8 @@ if __name__ == "__main__":
             subnet_id=subnet_id2
         )
         instances_cluster_2.append(id_instance)
-
+    """
+    instances_cluster_2 = ['i-01ba8646140d6cf22']
     aws_config['instances_cluster_1'] = instances_cluster_1
     aws_config['instances_cluster_2'] = instances_cluster_2
     # wait untill all created intances are running
@@ -150,6 +181,11 @@ if __name__ == "__main__":
     role_arn = get_role(iam, IAM_CONFIG['role'])
     aws_config['role_arn'] = role_arn
 
+    user_account = get_aws_user_account(sts)
+    bucket = create_bucket(s3, S3_CONFIG['bucket'])
+    put_bucket_policy(s3, S3_CONFIG['bucket_policy'], bucket, user_account, role_arn)
+    upload_server_app_to_s3_bucket(s3, bucket)
+
     app_id = create_application(code_deploy=code_deploy, application_name=CODE_DEPLOY_CONFIG['application_name'])
     aws_config['app_id'] = app_id
     
@@ -163,5 +199,22 @@ if __name__ == "__main__":
     aws_config['dep_group2'] = dep_group2
 
 
+
+    deployment_id_cluster_1 = create_deployment(
+        code_deploy = code_deploy,
+        bucket = bucket,
+        revision=CODE_DEPLOY_CONFIG['Revision'], 
+        deploy_group_name = CODE_DEPLOY_CONFIG['cluster1']['dep_group_name'],
+        app_name=CODE_DEPLOY_CONFIG['application_name']
+    )
+    deployment_id_cluster_2 = create_deployment(
+        code_deploy = code_deploy,
+        bucket = bucket,
+        revision=CODE_DEPLOY_CONFIG['Revision'], 
+        deploy_group_name = CODE_DEPLOY_CONFIG['cluster2']['dep_group_name'],
+        app_name=CODE_DEPLOY_CONFIG['application_name']
+    )
+
+
     # save aws configuration 
-    save_aws_config(config=aws_config, save_file='aws_config.json')
+    #save_aws_config(config=aws_config, save_file='aws_config.json')
